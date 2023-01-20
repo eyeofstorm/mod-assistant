@@ -36,6 +36,11 @@ enum Profession
     PROFESSION_LEVEL_GRAND_MASTER = 450,
 };
 
+enum CreatureDisplayID
+{
+    CREATURE_DISP_ID_FELTHAS = 27545, 
+};
+
 // Vendors
 bool aEnableHeirlooms;
 bool aEnableGlyphs;
@@ -65,6 +70,36 @@ uint32 aCostGrandMasterProfession;
 
 // NPC duration
 uint32 aNpcDuration;
+
+class PlayerHook : public PlayerScript
+{
+public:
+    PlayerHook() : PlayerScript("mod_assistant_player_hook") {}
+
+    void OnLogin(Player* player)
+    {
+        ChatHandler(player->GetSession()).SendSysMessage("This server is running mod_assistant module...");
+
+        if (strcmp(player->GetName().c_str(), "Felthas") == 0)
+        {
+            player->SetDisplayId(CREATURE_DISP_ID_FELTHAS);
+        }
+    }
+
+    // Called when a player switches to a new area (more accurate than UpdateZone)
+    void OnUpdateArea(Player* player, uint32 oldArea, uint32 newArea)
+    {
+        if (!player) return;
+
+        if (strcmp(player->GetName().c_str(), "Felthas") == 0)
+        {
+            if (player->GetDisplayId() != 27545)
+            {
+                player->SetDisplayId(CREATURE_DISP_ID_FELTHAS);
+            }
+        }
+    }
+};
 
 class Assistant : public CreatureScript
 {
@@ -743,7 +778,7 @@ private:
 class Configuration : public WorldScript
 {
 public:
-    Configuration() : WorldScript("Configuration") {}
+    Configuration() : WorldScript("mod_assistant_configuration") {}
 
     void OnAfterConfigLoad(bool /*reload*/) override
     {
@@ -781,6 +816,7 @@ public:
 
 void AddSC_mod_assistant()
 {
+    new PlayerHook();
     new Assistant();
     new Configuration();
 }
