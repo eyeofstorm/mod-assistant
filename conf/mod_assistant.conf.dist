@@ -1,5 +1,8 @@
 [worldserver]
 
+### NPC Duration ###
+Assistant.NpcDuration = 120
+
 ### VENDORS ###
 # Obtain heirlooms from the assistant npc
 Assistant.Heirlooms = 1

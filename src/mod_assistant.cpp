@@ -7,6 +7,7 @@
 enum GossipId
 {
     ASSISTANT_GOSSIP_TEXT = 48,
+
     ASSISTANT_GOSSIP_HEIRLOOM = 100,
     ASSISTANT_GOSSIP_GLYPH = 200,
     ASSISTANT_GOSSIP_GEM = 400,
@@ -62,6 +63,9 @@ uint32 aCostArtisanProfession;
 uint32 aCostMasterProfession;
 uint32 aCostGrandMasterProfession;
 
+// NPC duration
+uint32 aNpcDuration;
+
 class Assistant : public CreatureScript
 {
 public:
@@ -87,9 +91,10 @@ public:
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I want utilities", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES);
 
         if (hasValidProfession(player))
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I want help with my professions", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_PROFESSIONS);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I want help with my professions", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_PROFESSIONS);
 
         SendGossipMenuFor(player, ASSISTANT_GOSSIP_TEXT, creature->GetGUID());
+
         return true;
     }
 
@@ -214,6 +219,7 @@ public:
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want some green gems", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 6);
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want some orange gems", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 7);
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Previous Page", GOSSIP_SENDER_MAIN, 1);
+
             SendGossipMenuFor(player, ASSISTANT_GOSSIP_TEXT, creature->GetGUID());
         }
         else if (action == ASSISTANT_GOSSIP_GEM + 1)
@@ -251,11 +257,20 @@ public:
         else if (action == ASSISTANT_GOSSIP_UTILITIES)
         {
             ClearGossipMenuFor(player);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my name", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES + 1, "Do you wish to continue the transaction?", aCostNameChange, false);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my appearance", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES + 2, "Do you wish to continue the transaction?", aCostCustomization, false);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my race", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES + 3, "Do you wish to continue the transaction?", aCostRaceChange, false);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my faction", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES + 4, "Do you wish to continue the transaction?", aCostFactionChange, false);
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my name",       GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  1, "Do you wish to continue the transaction?", aCostNameChange, false);
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my appearance", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  2, "Do you wish to continue the transaction?", aCostCustomization, false);
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my race",       GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  3, "Do you wish to continue the transaction?", aCostRaceChange, false);
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my faction",    GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  4, "Do you wish to continue the transaction?", aCostFactionChange, false);
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to reset my instances",   GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  5);
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to reset my cooldowns",   GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  6);
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to remove my sickness",   GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  7);
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to repair my items",      GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  8);
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to open bank",            GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  9);
+            // AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to open mailbox",         GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES + 10);
+
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Previous Page", GOSSIP_SENDER_MAIN, 1);
+
             SendGossipMenuFor(player, ASSISTANT_GOSSIP_TEXT, creature->GetGUID());
         }
         else if (action == ASSISTANT_GOSSIP_UTILITIES + 1)
@@ -318,6 +333,91 @@ public:
                 CloseGossipMenuFor(player);
             }
         }
+        else if (action == ASSISTANT_GOSSIP_UTILITIES + 5)
+        {
+            ClearGossipMenuFor(player);
+
+            // reset instance
+            for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+            {
+                BoundInstancesMap const& m_boundInstances = sInstanceSaveMgr->PlayerGetBoundInstances(player->GetGUID(), Difficulty(i));
+
+                for (BoundInstancesMap::const_iterator itr = m_boundInstances.begin(); itr != m_boundInstances.end();)
+                {
+                    if (itr->first != player->GetMapId())
+                    {
+                        sInstanceSaveMgr->PlayerUnbindInstance(player->GetGUID(), itr->first, Difficulty(i), true, player);
+                        itr = m_boundInstances.begin();
+                    }
+                    else
+                    {
+                        ++itr;
+                    }
+                }
+            }
+
+            player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFInstances succesfully reseted!");
+            player->CastSpell(player, 59908);
+
+            OnGossipSelect(player, creature, GOSSIP_SENDER_MAIN, 1);
+        }
+        else if (action == ASSISTANT_GOSSIP_UTILITIES + 6)
+        {
+            ClearGossipMenuFor(player);
+
+            // reset cooldowns
+            if (player->IsInCombat())
+            {
+                player->GetSession()->SendNotification("You are in combat!");
+                return false;
+            }
+
+            player->RemoveAllSpellCooldown();
+            player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFCooldowns succesfully reseted!");
+            player->CastSpell(player, 31726);
+
+            OnGossipSelect(player, creature, GOSSIP_SENDER_MAIN, 1);
+        }
+        else if (action == ASSISTANT_GOSSIP_UTILITIES + 7)
+        {
+            ClearGossipMenuFor(player);
+
+            // remove sickness
+            if(player->HasAura(15007))
+            {
+				player->RemoveAura(15007);
+            }
+
+            player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFSickness succesfully removed!");
+            player->CastSpell(player, 31726);
+
+            OnGossipSelect(player, creature, GOSSIP_SENDER_MAIN, 1);
+        }
+        else if (action == ASSISTANT_GOSSIP_UTILITIES + 8)
+        {
+            ClearGossipMenuFor(player);
+
+            // repair items
+            player->DurabilityRepairAll(false, 0, false);
+            player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFItems repaired succesfully!");
+            player->CastSpell(player, 31726);
+
+            OnGossipSelect(player, creature, GOSSIP_SENDER_MAIN, 1);
+        }
+        else if (action == ASSISTANT_GOSSIP_UTILITIES + 9)
+        {
+            ClearGossipMenuFor(player);
+
+            // open bank
+            player->GetSession()->SendShowBank(player->GetGUID());
+        }
+        // else if (action == ASSISTANT_GOSSIP_UTILITIES + 10)
+        // {
+        //     ClearGossipMenuFor(player);
+
+        //     // open mailbox
+        //     player->GetSession()->SendShowMailBox(player->GetGUID());
+        // }
         else if (action == ASSISTANT_GOSSIP_PROFESSIONS)
         {
             ClearGossipMenuFor(player);
@@ -647,6 +747,9 @@ public:
 
     void OnAfterConfigLoad(bool /*reload*/) override
     {
+        // NPC duration
+        aNpcDuration = sConfigMgr->GetOption<uint32>("Assistant.NpcDuration", 60) * IN_MILLISECONDS;
+
         // Vendors
         aEnableHeirlooms = sConfigMgr->GetOption<bool>("Assistant.Heirlooms", 1);
         aEnableGlyphs = sConfigMgr->GetOption<bool>("Assistant.Glyphs", 1);
