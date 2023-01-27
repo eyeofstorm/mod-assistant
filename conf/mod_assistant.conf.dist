@@ -52,3 +52,7 @@ Assistant.Professions.Artisan.Cost = 750
 Assistant.Professions.Master.Cost = 1250
 Assistant.Professions.GrandMaster.Cost = 2500
 ###
+
+### Teleport ###
+Assistant.Teleport = 1
+###

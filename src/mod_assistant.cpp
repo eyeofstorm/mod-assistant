@@ -14,6 +14,7 @@ enum GossipId
     ASSISTANT_GOSSIP_CONTAINER = 500,
     ASSISTANT_GOSSIP_UTILITIES = 600,
     ASSISTANT_GOSSIP_PROFESSIONS = 700,
+    ASSISTANT_GOSSIP_TELEPORT = 800,
 };
 
 enum VendorId
@@ -38,7 +39,11 @@ enum Profession
 
 enum CreatureDisplayID
 {
-    CREATURE_DISP_ID_FELTHAS = 27545, 
+    CREATURE_MODEL_ID_FELTHAS  = 27545, 
+    CREATURE_MODEL_ID_VALEERA  = 26365, 
+    CREATURE_MODEL_ID_ARTHAS   = 24949,
+    CREATURE_MODEL_ID_REXXAR   = 20918,
+    CREATURE_MODEL_ID_SYLVANAS = 28213,
 };
 
 // Vendors
@@ -61,6 +66,7 @@ bool aEnableExpertProfession;
 bool aEnableArtisanProfession;
 bool aEnableMasterProfession;
 bool aEnableGrandMasterProfession;
+bool aEnableTeleport;
 uint32 aCostApprenticeProfession;
 uint32 aCostJourneymanProfession;
 uint32 aCostExpertProfession;
@@ -80,10 +86,7 @@ public:
     {
         ChatHandler(player->GetSession()).SendSysMessage("This server is running mod_assistant module...");
 
-        if (strcmp(player->GetName().c_str(), "Felthas") == 0)
-        {
-            player->SetDisplayId(CREATURE_DISP_ID_FELTHAS);
-        }
+        Cosplay(player);
     }
 
     // Called when a player switches to a new area (more accurate than UpdateZone)
@@ -91,12 +94,75 @@ public:
     {
         if (!player) return;
 
-        if (strcmp(player->GetName().c_str(), "Felthas") == 0)
+        Cosplay(player);
+    }
+
+private:
+
+    void Cosplay(Player* player)
+    {
+        if (CosplayDeathightArthas(player))
         {
-            if (player->GetDisplayId() != 27545)
-            {
-                player->SetDisplayId(CREATURE_DISP_ID_FELTHAS);
-            }
+            return;
+        }
+
+        if (CosplayValeera(player))
+        {
+            return;
+        }
+
+        if (CosplayRexxar(player))
+        {
+            return;
+        }
+    }
+
+    bool CosplayDeathightArthas(Player* player)
+    {
+        if (strcmp(player->GetName().c_str(), "阿爾薩斯・米奈希爾") == 0)
+        {
+            MorphTo(player, CREATURE_MODEL_ID_FELTHAS, 0.80f);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool CosplayValeera(Player* player)
+    {
+        if (strcmp(player->GetName().c_str(), "瓦莉拉・薩古納爾") == 0)
+        {
+            MorphTo(player, CREATURE_MODEL_ID_VALEERA);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool CosplayRexxar(Player* player)
+    {
+        if (strcmp(player->GetName().c_str(), "sbd") == 0)
+        {
+            MorphTo(player, CREATURE_MODEL_ID_REXXAR, 0.65f);
+            return true;
+        }
+
+        return false;
+    }
+
+    void MorphTo(Player* player, CreatureDisplayID target, float scale = 1.0f)
+    {
+        if (!player) return;
+
+        if (player->GetNativeDisplayId() != target)
+        {
+            player->SetNativeDisplayId(target);
+        }
+
+        if (player->GetDisplayId() != target)
+        {
+            player->SetDisplayId(target);
+            player->SetObjectScale(scale);
         }
     }
 };
@@ -110,23 +176,175 @@ public:
     {
         ClearGossipMenuFor(player);
 
+        LocaleConstant locale = player->GetSession()->GetSessionDbLocaleIndex();
+
+        std::string sHeirlooms = "";
+
+        switch (player->GetSession()->GetSessionDbLocaleIndex())
+        {
+            case LOCALE_zhCN:
+            {
+                sHeirlooms = "我想买传家宝";
+                break;
+            }
+            case LOCALE_zhTW:
+            {
+                sHeirlooms = "我想買傳家寶";
+                break;
+            }
+            default:
+            {
+                sHeirlooms = "I want heirlooms";
+                break;
+            }
+        }
+
+        std::string sGlyphs = "";
+
+        switch (player->GetSession()->GetSessionDbLocaleIndex())
+        {
+            case LOCALE_zhCN:
+            {
+                sGlyphs = "我想买雕文";
+                break;
+            }
+            case LOCALE_zhTW:
+            {
+                sGlyphs = "我想買雕文";
+                break;
+            }
+            default:
+            {
+                sGlyphs = "I want glyphs";
+                break;
+            }
+        }
+
+        std::string sGems = "";
+
+        switch (player->GetSession()->GetSessionDbLocaleIndex())
+        {
+            case LOCALE_zhCN:
+            {
+                sGems = "我想买宝石";
+                break;
+            }
+            case LOCALE_zhTW:
+            {
+                sGems = "我想買寶石";
+                break;
+            }
+            default:
+            {
+                sGems = "I want gems";
+                break;
+            }
+        }
+
+        std::string sContainers = "";
+
+        switch (player->GetSession()->GetSessionDbLocaleIndex())
+        {
+            case LOCALE_zhCN:
+            {
+                sContainers = "我想买点容器";
+                break;
+            }
+            case LOCALE_zhTW:
+            {
+                sContainers = "我想買容器";
+                break;
+            }
+            default:
+            {
+                sContainers = "I want containers";
+                break;
+            }
+        }
+
+        std::string sUtilities = "";
+
+        switch (player->GetSession()->GetSessionDbLocaleIndex())
+        {
+            case LOCALE_zhCN:
+            {
+                sUtilities = "我想看看其他服务";
+                break;
+            }
+            case LOCALE_zhTW:
+            {
+                sUtilities = "我想看看其他服務";
+                break;
+            }
+            default:
+            {
+                sUtilities = "I want utilities";
+                break;
+            }
+        }
+
+        std::string sProfessions = "";
+
+        switch (player->GetSession()->GetSessionDbLocaleIndex())
+        {
+            case LOCALE_zhCN:
+            {
+                sProfessions = "我想提升下我的专业技能";
+                break;
+            }
+            case LOCALE_zhTW:
+            {
+                sProfessions = "我想提升下我的專業技能";
+                break;
+            }
+            default:
+            {
+                sProfessions = "I want help with my professions";
+                break;
+            }
+        }
+
+        std::string sTeleport = "";
+
+        switch (player->GetSession()->GetSessionDbLocaleIndex())
+        {
+            case LOCALE_zhCN:
+            {
+                sTeleport = "我要传送";
+                break;
+            }
+            case LOCALE_zhTW:
+            {
+                sTeleport = "我要傳送";
+                break;
+            }
+            default:
+            {
+                sTeleport = "I want to teleport";
+                break;
+            }
+        }
+
         if (aEnableHeirlooms)
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I want heirlooms", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_HEIRLOOM);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, sHeirlooms, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_HEIRLOOM);
 
         if (aEnableGlyphs)
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I want glyphs", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GLYPH);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, sGlyphs, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GLYPH);
 
         if (aEnableGems)
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I want gems", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, sGems, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM);
 
         if (aEnableContainers)
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I want containers", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_CONTAINER);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, sContainers, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_CONTAINER);
 
         if (aEnableUtilities)
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I want utilities", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, sUtilities, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES);
 
         if (hasValidProfession(player))
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I want help with my professions", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_PROFESSIONS);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, sProfessions, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_PROFESSIONS);
+
+        if (aEnableTeleport)
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, sTeleport, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_TELEPORT);
 
         SendGossipMenuFor(player, ASSISTANT_GOSSIP_TEXT, creature->GetGUID());
 
@@ -145,10 +363,93 @@ public:
         else if (action == ASSISTANT_GOSSIP_HEIRLOOM)
         {
             ClearGossipMenuFor(player);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want weapons", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_HEIRLOOM + 1);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want armor", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_HEIRLOOM + 2);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want something else", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_HEIRLOOM + 3);
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Previous Page", GOSSIP_SENDER_MAIN, 1);
+
+            std::string localeMenuItemString = "";
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想买武器";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想買武器";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want weapons";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_HEIRLOOM + 1);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想买护甲";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想買護甲";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want armor";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_HEIRLOOM + 2);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想再看点其他的";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想再看點其它的";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want to see something else";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_HEIRLOOM + 3);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "返回";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "返回";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "Previous Page";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, localeMenuItemString, GOSSIP_SENDER_MAIN, 1);
+
             SendGossipMenuFor(player, ASSISTANT_GOSSIP_TEXT, creature->GetGUID());
         }
         else if (action == ASSISTANT_GOSSIP_HEIRLOOM + 1)
@@ -166,9 +467,71 @@ public:
         else if (action == ASSISTANT_GOSSIP_GLYPH)
         {
             ClearGossipMenuFor(player);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want some major glyphs", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GLYPH + 1);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want some minor glyphs", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GLYPH + 2);
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Previous Page", GOSSIP_SENDER_MAIN, 1);
+
+            std::string localeMenuItemString = "";
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想看看大型雕文";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想看看高階雕文";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want some major glyphs";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GLYPH + 1);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想看看小型雕文";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想看看初階雕文";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want some minor glyphs";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GLYPH + 2);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "返回";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "返回";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "Previous Page";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, localeMenuItemString, GOSSIP_SENDER_MAIN, 1);
             SendGossipMenuFor(player, ASSISTANT_GOSSIP_TEXT, creature->GetGUID());
         }
         else if (action == ASSISTANT_GOSSIP_GLYPH + 1)
@@ -246,14 +609,176 @@ public:
         else if (action == ASSISTANT_GOSSIP_GEM)
         {
             ClearGossipMenuFor(player);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want some meta gems", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 1);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want some red gems", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 2);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want some blue gems", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 3);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want some yellow gems", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 4);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want some purple gems", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 5);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want some green gems", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 6);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want some orange gems", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 7);
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Previous Page", GOSSIP_SENDER_MAIN, 1);
+
+            std::string localeMenuItemString = "";
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想看看变换宝石";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想看看變換寶石";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want some meta gems";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 1);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想看看红色宝石";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想看看紅色寶石";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want some red gems";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 2);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想看看蓝色宝石";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想看看藍色寶石";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want some blue gems";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 3);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想看看黄色宝石";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想看看黃色寶石";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want some yellow gems";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 4);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想看看紫色宝石";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想看看紫色寶石";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want some purple gems";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 5);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想看看绿色宝石";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想看看綠色寶石";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want some green gems";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 6);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想看看橙色宝石";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想看看橙色寶石";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want some orange gems";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_GEM + 7);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "返回";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "返回";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "Previous Page";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, localeMenuItemString, GOSSIP_SENDER_MAIN, 1);
 
             SendGossipMenuFor(player, ASSISTANT_GOSSIP_TEXT, creature->GetGUID());
         }
@@ -293,16 +818,38 @@ public:
         {
             ClearGossipMenuFor(player);
 
+            std::string localeMenuItemString = "";
+
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my name",       GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  1, "Do you wish to continue the transaction?", aCostNameChange, false);
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my appearance", GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  2, "Do you wish to continue the transaction?", aCostCustomization, false);
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my race",       GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  3, "Do you wish to continue the transaction?", aCostRaceChange, false);
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to change my faction",    GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  4, "Do you wish to continue the transaction?", aCostFactionChange, false);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to reset my instances",   GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  5);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to reset my cooldowns",   GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  6);
-            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to remove my sickness",   GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  7);
+            
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我要重置已绑定的副本";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我要重置已綁定的副本";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want to reset my instances";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, localeMenuItemString,   GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  5, "Do you wish to continue the transaction?", 1000000, false);
+
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to reset my cooldowns",   GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  6, "Do you wish to continue the transaction?", 1000000, false);
+            AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to remove my sickness",   GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  7, "Do you wish to continue the transaction?", 500000, false);
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to repair my items",      GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  8);
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to open bank",            GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES +  9);
-            // AddGossipItemFor(player, GOSSIP_ICON_VENDOR, "I want to open mailbox",         GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_UTILITIES + 10);
 
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Previous Page", GOSSIP_SENDER_MAIN, 1);
 
@@ -391,7 +938,7 @@ public:
                 }
             }
 
-            player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFInstances succesfully reseted!");
+            player->GetSession()->SendNotification("|cffFFFF00SERVICES \n |cffFFFFFFInstances succesfully reseted!");
             player->CastSpell(player, 59908);
 
             OnGossipSelect(player, creature, GOSSIP_SENDER_MAIN, 1);
@@ -446,13 +993,6 @@ public:
             // open bank
             player->GetSession()->SendShowBank(player->GetGUID());
         }
-        // else if (action == ASSISTANT_GOSSIP_UTILITIES + 10)
-        // {
-        //     ClearGossipMenuFor(player);
-
-        //     // open mailbox
-        //     player->GetSession()->SendShowMailBox(player->GetGUID());
-        // }
         else if (action == ASSISTANT_GOSSIP_PROFESSIONS)
         {
             ClearGossipMenuFor(player);
@@ -712,6 +1252,312 @@ public:
 
             OnGossipSelect(player, creature, GOSSIP_SENDER_MAIN, 1);
         }
+        else if (action == ASSISTANT_GOSSIP_TELEPORT)
+        {
+            ClearGossipMenuFor(player);
+
+            std::string localeMenuItemString = "";
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想传送到黑翼之巢";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想傳送到黑翼巢穴";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want to teleport to blackwing lair";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_TELEPORT + 1);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想传送到熔火之心";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想傳送到熔火核心";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want to teleport to molten core";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_TELEPORT + 2);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想传送到祖尔格拉布";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想傳送到祖爾格拉布";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want to teleport to MoltenCore";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_TELEPORT + 3);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想传送到东部王国的主城";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想傳送到東部王國的主城";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want to teleport to city of eastern kingdoms";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_TELEPORT + 4);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "我想传送到卡利姆多的主城";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "我想傳送到卡利姆多的主城";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "I want to teleport to city of kalimdor";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_TALK, localeMenuItemString, GOSSIP_SENDER_MAIN, ASSISTANT_GOSSIP_TELEPORT + 5);
+
+            switch (player->GetSession()->GetSessionDbLocaleIndex())
+            {
+                case LOCALE_zhCN:
+                {
+                    localeMenuItemString = "返回";
+                    break;
+                }
+                case LOCALE_zhTW:
+                {
+                    localeMenuItemString = "返回";
+                    break;
+                }
+                default:
+                {
+                    localeMenuItemString = "Previous Page";
+                    break;
+                }
+            }
+
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, localeMenuItemString, GOSSIP_SENDER_MAIN, 1);
+
+            SendGossipMenuFor(player, ASSISTANT_GOSSIP_TEXT, creature->GetGUID());
+        }
+        else if (action == ASSISTANT_GOSSIP_TELEPORT + 1)
+        {
+            ClearGossipMenuFor(player);
+
+            if (player->IsInCombat())
+            {
+                player->GetSession()->SendNotification("You are in combat!");
+                return false;
+            }
+
+            // Blackwing Lair
+            if (player->TeleportTo(229, 164.789f, -475.305f, 116.842f, 0.022714f))
+            {
+                player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport succesfully!");
+            }
+            else
+            {
+                player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport failed!");
+            }
+        }
+        else if (action == ASSISTANT_GOSSIP_TELEPORT + 2)
+        {
+            ClearGossipMenuFor(player);
+
+            if (player->IsInCombat())
+            {
+                player->GetSession()->SendNotification("You are in combat!");
+                return false;
+            }
+
+            // molten core
+            if (player->TeleportTo(230, 1126.64f, -459.94f, -102.535f, 3.46095f))
+            {
+                player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport succesfully!");
+            }
+            else
+            {
+                player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport failed!");
+            }
+        }
+        else if (action == ASSISTANT_GOSSIP_TELEPORT + 3)
+        {
+            ClearGossipMenuFor(player);
+
+            if (player->IsInCombat())
+            {
+                player->GetSession()->SendNotification("You are in combat!");
+                return false;
+            }
+
+            // zulgurub
+            if (player->TeleportTo(0, -11916.7f, -1215.72f, 92.289f, 4.72454f))
+            {
+                player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport succesfully!");
+            }
+            else
+            {
+                player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport failed!");
+            }
+        }
+        else if (action == ASSISTANT_GOSSIP_TELEPORT + 4)
+        {
+            ClearGossipMenuFor(player);
+
+            if (player->IsInCombat())
+            {
+                player->GetSession()->SendNotification("You are in combat!");
+                return false;
+            }
+
+            // eastern kingdoms
+            switch (player->getRace())
+            {
+                case RACE_HUMAN:
+                case RACE_DWARF:
+                case RACE_NIGHTELF:
+                case RACE_GNOME:
+                case RACE_DRAENEI:
+                {
+                    // iron forge
+                    if (player->TeleportTo(0, -4918.88f, -940.406f, 501.564f, 5.42347f))
+                    {
+                        player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport succesfully!");
+                    }
+                    else
+                    {
+                        player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport failed!");
+                    }
+
+                    break;
+                }
+                case RACE_ORC:
+                case RACE_UNDEAD_PLAYER:
+                case RACE_TAUREN:
+                case RACE_TROLL:
+                case RACE_BLOODELF:
+                {
+                    // under city
+                    if (player->TeleportTo(0, 1584.14f, 240.308f, -52.1534f, 0.041793f))
+                    {
+                        player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport succesfully!");
+                    }
+                    else
+                    {
+                        player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport failed!");
+                    }
+
+                    break;
+                }
+                default:
+                {
+                    player->GetSession()->SendNotification("Wrong race!");
+                    break;
+                }
+            }
+        }
+        else if (action == ASSISTANT_GOSSIP_TELEPORT + 5)
+        {
+            ClearGossipMenuFor(player);
+
+            if (player->IsInCombat())
+            {
+                player->GetSession()->SendNotification("You are in combat!");
+                return false;
+            }
+
+            // kalimdor
+            switch (player->getRace())
+            {
+                case RACE_HUMAN:
+                case RACE_DWARF:
+                case RACE_NIGHTELF:
+                case RACE_GNOME:
+                case RACE_DRAENEI:
+                {
+                    // darnassus
+                    if (player->TeleportTo(1, 9949.56f, 2284.21f, 1341.4f, 1.59587f))
+                    {
+                        player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport succesfully!");
+                    }
+                    else
+                    {
+                        player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport failed!");
+                    }
+
+                    break;
+                }
+                case RACE_ORC:
+                case RACE_UNDEAD_PLAYER:
+                case RACE_TAUREN:
+                case RACE_TROLL:
+                case RACE_BLOODELF:
+                {
+                    // orgrimmar
+                    if (player->TeleportTo(1, 1629.85f, -4373.64f, 31.5573f, 3.69762f))
+                    {
+                        player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport succesfully!");
+                    }
+                    else
+                    {
+                        player->GetSession()->SendNotification("|cffFFFF00NPC SERVICES \n |cffFFFFFFTeleport failed!");
+                    }
+
+                    break;
+                }
+                default:
+                {
+                    player->GetSession()->SendNotification("Wrong race!");
+                    break;
+                }
+            }
+        }
 
         return true;
     }
@@ -811,6 +1657,9 @@ public:
         aCostArtisanProfession = sConfigMgr->GetOption<uint32>("Assistant.Professions.Artisan.Cost", 750);
         aCostMasterProfession = sConfigMgr->GetOption<uint32>("Assistant.Professions.Master.Cost", 1250);
         aCostGrandMasterProfession = sConfigMgr->GetOption<uint32>("Assistant.Professions.GrandMaster.Cost", 2500);
+
+        // Teleport
+        aEnableTeleport = sConfigMgr->GetOption<bool>("Assistant.Teleport", 1);
     }
 };
 
