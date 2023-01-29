@@ -115,6 +115,11 @@ private:
         {
             return;
         }
+
+        if (CosplaySylvanas(player))
+        {
+            return;
+        }
     }
 
     bool CosplayDeathightArthas(Player* player)
@@ -141,9 +146,22 @@ private:
 
     bool CosplayRexxar(Player* player)
     {
-        if (strcmp(player->GetName().c_str(), "sbd") == 0)
+        if (strcmp(player->GetName().c_str(), "雷克薩・雷瑪") == 0 || 
+            strcmp(player->GetName().c_str(), "Sbd") == 0)
         {
-            MorphTo(player, CREATURE_MODEL_ID_REXXAR, 0.65f);
+            MorphTo(player, CREATURE_MODEL_ID_REXXAR, 0.5f);
+            return true;
+        }
+
+        return false;
+    }
+
+    bool CosplaySylvanas(Player* player)
+    {
+        if (strcmp(player->GetName().c_str(), "希爾瓦納斯・風行者") == 0 || 
+            strcmp(player->GetName().c_str(), "Sbdd") == 0)
+        {
+            MorphTo(player, CREATURE_MODEL_ID_SYLVANAS, 0.85f);
             return true;
         }
 
