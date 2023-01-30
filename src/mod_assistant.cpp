@@ -40,7 +40,6 @@ enum Profession
 enum CreatureDisplayID
 {
     CREATURE_MODEL_ID_FELTHAS  = 27545, 
-    CREATURE_MODEL_ID_VALEERA  = 26365, 
     CREATURE_MODEL_ID_ARTHAS   = 24949,
     CREATURE_MODEL_ID_REXXAR   = 20918,
     CREATURE_MODEL_ID_SYLVANAS = 28213,
@@ -101,12 +100,7 @@ private:
 
     void Cosplay(Player* player)
     {
-        if (CosplayDeathightArthas(player))
-        {
-            return;
-        }
-
-        if (CosplayValeera(player))
+        if (CosplayArthas(player))
         {
             return;
         }
@@ -122,23 +116,32 @@ private:
         }
     }
 
-    bool CosplayDeathightArthas(Player* player)
+    bool CosplayArthas(Player* player)
     {
         if (strcmp(player->GetName().c_str(), "阿爾薩斯・米奈希爾") == 0)
         {
-            MorphTo(player, CREATURE_MODEL_ID_FELTHAS, 0.80f);
-            return true;
-        }
+            bool isValidRace = true;
 
-        return false;
-    }
-
-    bool CosplayValeera(Player* player)
-    {
-        if (strcmp(player->GetName().c_str(), "瓦莉拉・薩古納爾") == 0)
-        {
-            MorphTo(player, CREATURE_MODEL_ID_VALEERA);
-            return true;
+            switch (player->getRace())
+            {
+                case RACE_UNDEAD_PLAYER:
+                {
+                    MorphTo(player, CREATURE_MODEL_ID_FELTHAS, 0.80f);
+                    break;
+                }
+                case RACE_HUMAN:
+                {
+                    MorphTo(player, CREATURE_MODEL_ID_ARTHAS, 0.80f);
+                    break;
+                }
+                default:
+                {
+                    isValidRace = false;
+                    break;
+                }
+            }
+            
+            return isValidRace;
         }
 
         return false;
@@ -146,8 +149,7 @@ private:
 
     bool CosplayRexxar(Player* player)
     {
-        if (strcmp(player->GetName().c_str(), "雷克薩・雷瑪") == 0 || 
-            strcmp(player->GetName().c_str(), "Sbd") == 0)
+        if (strcmp(player->GetName().c_str(), "雷克薩・雷瑪") == 0)
         {
             MorphTo(player, CREATURE_MODEL_ID_REXXAR, 0.5f);
             return true;
@@ -158,8 +160,7 @@ private:
 
     bool CosplaySylvanas(Player* player)
     {
-        if (strcmp(player->GetName().c_str(), "希爾瓦納斯・風行者") == 0 || 
-            strcmp(player->GetName().c_str(), "Sbdd") == 0)
+        if (strcmp(player->GetName().c_str(), "希爾瓦納斯・風行者") == 0)
         {
             MorphTo(player, CREATURE_MODEL_ID_SYLVANAS, 0.85f);
             return true;
