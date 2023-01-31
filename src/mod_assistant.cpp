@@ -151,8 +151,11 @@ private:
     {
         if (strcmp(player->GetName().c_str(), "雷克薩・雷瑪") == 0)
         {
-            MorphTo(player, CREATURE_MODEL_ID_REXXAR, 0.5f);
-            return true;
+            if (player->getRace() == RACE_ORC)
+            {
+                MorphTo(player, CREATURE_MODEL_ID_REXXAR, 0.5f);
+                return true;
+            }
         }
 
         return false;
@@ -162,8 +165,12 @@ private:
     {
         if (strcmp(player->GetName().c_str(), "希爾瓦納斯・風行者") == 0)
         {
-            MorphTo(player, CREATURE_MODEL_ID_SYLVANAS, 0.85f);
-            return true;
+            if (player->getRace() == RACE_BLOODELF || 
+                player->getRace() == RACE_NIGHTELF)
+            {
+                MorphTo(player, CREATURE_MODEL_ID_SYLVANAS, 0.85f);
+                return true;
+            }
         }
 
         return false;
